@@ -56,21 +56,25 @@ public final class Constants {
         public static final int kBackRightDriveAbsoluteEncoderPort = 3;
 
         public static final boolean kFrontLeftDriveAbsoluteEncoderReversed = false;
-        public static final boolean kBackLeftDriveAbsoluteEncoderReversed = false;
-        public static final boolean kFrontRightDriveAbsoluteEncoderReversed = false;
+        public static final boolean kBackLeftDriveAbsoluteEncoderReversed = true;
+        public static final boolean kFrontRightDriveAbsoluteEncoderReversed = true;
         public static final boolean kBackRightDriveAbsoluteEncoderReversed = false;
 
-        //public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = -0.254;
-        public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = -Math.toRadians(188.8560);
+       public static final double voltsToDegrees = 5/360;
 
-        //public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = -1.252;
-        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = Math.toRadians(66.7440); //2.0945
 
-        //public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = -1.816;
-        public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = Math.toRadians(2.6640);
+        public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = Math.toRadians(1.252 / voltsToDegrees);
+        //public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = 0;
 
-        //public static final double kBackRightDriveAbsoluteEncoderOffsetRad = -4.811;
-        public static final double kBackRightDriveAbsoluteEncoderOffsetRad = -Math.toRadians(157.4640);
+
+        //public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = 0;
+        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = Math.toRadians(2.083 / voltsToDegrees); //2.0945
+
+        //public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = 0;
+        public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = Math.toRadians(90+4.496 / voltsToDegrees);
+
+        //public static final double kBackRightDriveAbsoluteEncoderOffsetRad = 0;
+        public static final double kBackRightDriveAbsoluteEncoderOffsetRad = Math.toRadians(0.946 / voltsToDegrees);
 
         public static final double kPhysicalMaxSpeedMetersPerSecond = 5;
         public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;
@@ -104,7 +108,7 @@ public final class Constants {
         public static final int LEFT_Y = 1;
         public static final int LEFT_X = 0;
         public static final int RIGHT_X = 4;
-        public static final int kDriverFieldOrientedButtonIdx = 1;
+        public static final int kDriverFieldOrientedButtonIdx = 8;
 
         public static final double kDeadband = 0.1;
     }
