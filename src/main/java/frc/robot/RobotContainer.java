@@ -1,83 +1,86 @@
-package frc.robot.commands;
+package frc.robot;
 
-import java.util.function.Supplier;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import java.util.List;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.SwerveJoystickCmd;
 import frc.robot.subsystems.SwerveSubsystem;
 
-public class SwerveJoystickCmd extends CommandBase {
+public class RobotContainer {
 
-    private final SwerveSubsystem swerveSubsystem;
-    private final Supplier<Double> xSpdFunction, ySpdFunction, turningSpdFunction;
-    private final Supplier<Boolean> fieldOrientedFunction;
-    private final SlewRateLimiter xLimiter, yLimiter, turningLimiter;
+    private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
 
-    public SwerveJoystickCmd(SwerveSubsystem swerveSubsystem,
-            Supplier<Double> xSpdFunction, Supplier<Double> ySpdFunction, Supplier<Double> turningSpdFunction,
-            Supplier<Boolean> fieldOrientedFunction) {
-        this.swerveSubsystem = swerveSubsystem;
-        this.xSpdFunction = xSpdFunction;
-        this.ySpdFunction = ySpdFunction;
-        this.turningSpdFunction = turningSpdFunction;
-        this.fieldOrientedFunction = fieldOrientedFunction;
-        this.xLimiter = new SlewRateLimiter(DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond);
-        this.yLimiter = new SlewRateLimiter(DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond);
-        this.turningLimiter = new SlewRateLimiter(DriveConstants.kTeleDriveMaxAngularAccelerationUnitsPerSecond);
-        addRequirements(swerveSubsystem);
+    private final XboxController driverController = new XboxController(OIConstants.driveController);
+
+    public RobotContainer() {
+        swerveSubsystem.setDefaultCommand(new SwerveJoystickCmd(
+                swerveSubsystem,
+                () -> -driverController.getRawAxis(OIConstants.LEFT_Y),
+                () -> driverController.getRawAxis(OIConstants.LEFT_X),
+                () -> driverController.getRawAxis(OIConstants.RIGHT_X),
+                () -> !driverController.getRawButton(OIConstants.kDriverFieldOrientedButtonIdx)));
+
+        configureButtonBindings();
     }
 
-    @Override
-    public void initialize() {
-     //swerveSubsystem.zeroHeading();
+    private void configureButtonBindings() {
+        new JoystickButton(driverController, 1).whenPressed(() -> swerveSubsystem.zeroHeading());
     }
 
-    @Override
-    public void execute() {
-        // 1. Get real-time joystick inputs
-        double xSpeed = xSpdFunction.get();
-        double ySpeed = ySpdFunction.get();
-        double turningSpeed = turningSpdFunction.get();
+    public Command getAutonomousCommand() {
+        // 1. Create trajectory settings
+        TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
+                AutoConstants.kMaxSpeedMetersPerSecond,
+                AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+                        .setKinematics(DriveConstants.kDriveKinematics);
 
-        // 2. Apply deadband
-        xSpeed = Math.abs(xSpeed) > OIConstants.kDeadband ? xSpeed : 0.0;
-        ySpeed = Math.abs(ySpeed) > OIConstants.kDeadband ? ySpeed : 0.0;
-        turningSpeed = Math.abs(turningSpeed) > OIConstants.kDeadband ? turningSpeed : 0.0;
+        // 2. Generate trajectory
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+                new Pose2d(0, 0, new Rotation2d(0)),
+                List.of(
+                        new Translation2d(1, 0),
+                        new Translation2d(1, -1)),
+                new Pose2d(2, -1, Rotation2d.fromDegrees(180)),
+                trajectoryConfig);
 
-        // 3. Make the driving smoother
-        xSpeed = xLimiter.calculate(xSpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
-        ySpeed = yLimiter.calculate(ySpeed) * DriveConstants.kTeleDriveMaxSpeedMetersPerSecond;
-        turningSpeed = turningLimiter.calculate(turningSpeed)
-                * DriveConstants.kTeleDriveMaxAngularSpeedRadiansPerSecond;
+        // 3. Define PID controllers for tracking trajectory
+        PIDController xController = new PIDController(AutoConstants.kPXController, 0, 0);
+        PIDController yController = new PIDController(AutoConstants.kPYController, 0, 0);
+        ProfiledPIDController thetaController = new ProfiledPIDController(
+                AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-        // 4. Construct desired chassis speeds
-        ChassisSpeeds chassisSpeeds;
-        if (fieldOrientedFunction.get()) {
-            // Relative to field
-            chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xSpeed, ySpeed, turningSpeed, swerveSubsystem.getRotation2d());
-        } else {
-            // Relative to robot
-            chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, turningSpeed);
-        }
+        // 4. Construct command to follow trajectory
+        SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
+                trajectory,
+                swerveSubsystem::getPose,
+                DriveConstants.kDriveKinematics,
+                xController,
+                yController,
+                thetaController,
+                swerveSubsystem::setModuleStates,
+                swerveSubsystem);
 
-        // 5. Convert chassis speeds to individual module states
-        SwerveModuleState[] moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
-
-        // 6. Output each module states to wheels
-        swerveSubsystem.setModuleStates(moduleStates);
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        swerveSubsystem.stopModules();
-    }
-
-    @Override
-    public boolean isFinished() {
-        return false;
+        // 5. Add some init and wrap-up, and return everything
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> swerveSubsystem.resetOdometry(trajectory.getInitialPose())),
+                swerveControllerCommand,
+                new InstantCommand(() -> swerveSubsystem.stopModules())); 
     }
 }
