@@ -20,34 +20,43 @@ public final class Constants {
 
     public static final class DriveConstants {
 
-        public static final double kTrackWidth = Units.inchesToMeters(23.5);
+        public static final double kTrackWidth = Units.inchesToMeters(30);
         // Distance between right and left wheels
-        public static final double kWheelBase = Units.inchesToMeters(23.5);
+        public static final double kWheelBase = Units.inchesToMeters(30);
         // Distance between front and back wheels
-        public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
-                new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+       /* public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+                new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
                 new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, -kTrackWidth / 2),
-                new Translation2d(-kWheelBase / 2, kTrackWidth / 2));
+                new Translation2d(kWheelBase / 2,- kTrackWidth / 2),
+                new Translation2d(-kWheelBase / 2,- kTrackWidth / 2));*/
+                public static final Translation2d m_frontLeftLocation = new Translation2d(-0.381, 0.381);
+                public static final Translation2d m_frontRightLocation = new Translation2d(-0.381, -0.381);
+                public static final Translation2d m_backLeftLocation = new Translation2d(0.381, 0.381);
+                public static final Translation2d m_backRightLocation = new Translation2d(0.381, -0.381);
+            
+             public  static final SwerveDriveKinematics kDriveKinematics =
+                new SwerveDriveKinematics(
+                    m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
+            
 
-        public static final int kFrontLeftDriveMotorPort = 1; //1
-        public static final int kBackLeftDriveMotorPort = 7; //7
-        public static final int kFrontRightDriveMotorPort = 3; //3
-        public static final int kBackRightDriveMotorPort = 5; //5
+        public static final int kFrontLeftDriveMotorPort = 1; //3
+        public static final int kBackLeftDriveMotorPort = 7; //1
+        public static final int kFrontRightDriveMotorPort = 3; //5
+        public static final int kBackRightDriveMotorPort = 5; //7
 
-        public static final int kFrontLeftTurningMotorPort = 8; //8
-        public static final int kBackLeftTurningMotorPort = 2; //2
+        public static final int kFrontLeftTurningMotorPort = 2; //8
+        public static final int kBackLeftTurningMotorPort = 8; //2
         public static final int kFrontRightTurningMotorPort = 4; //4
         public static final int kBackRightTurningMotorPort = 6; //6
 
-        public static final boolean kFrontLeftTurningEncoderReversed = false;
-        public static final boolean kBackLeftTurningEncoderReversed = false;
-        public static final boolean kFrontRightTurningEncoderReversed = false;
-        public static final boolean kBackRightTurningEncoderReversed = false;
+        public static final boolean kFrontLeftTurningEncoderReversed = true;
+        public static final boolean kBackLeftTurningEncoderReversed = true;
+        public static final boolean kFrontRightTurningEncoderReversed = true;
+        public static final boolean kBackRightTurningEncoderReversed = true;
 
-        public static final boolean kFrontLeftDriveEncoderReversed = false;
+        public static final boolean kFrontLeftDriveEncoderReversed = true;
         public static final boolean kBackLeftDriveEncoderReversed = true;
-        public static final boolean kFrontRightDriveEncoderReversed = true;
+        public static final boolean kFrontRightDriveEncoderReversed = false;
         public static final boolean kBackRightDriveEncoderReversed = false;
 
         public static final int kFrontLeftDriveAbsoluteEncoderPort = 0;
@@ -57,24 +66,19 @@ public final class Constants {
 
         public static final boolean kFrontLeftDriveAbsoluteEncoderReversed = true;
         public static final boolean kBackLeftDriveAbsoluteEncoderReversed = true;
-        public static final boolean kFrontRightDriveAbsoluteEncoderReversed = false;
-        public static final boolean kBackRightDriveAbsoluteEncoderReversed = false;
+        public static final boolean kFrontRightDriveAbsoluteEncoderReversed = true;
+        public static final boolean kBackRightDriveAbsoluteEncoderReversed = true;
 
        public static final double voltsToDegrees = 5/360;
 
 
-       // public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = -Math.toRadians(4.915 / voltsToDegrees);
-        public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = -Math.toRadians(533.88);
+        public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = -Math.toRadians( 2.686/ voltsToDegrees);
 
+        public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = -Math.toRadians(0.880 / voltsToDegrees);
 
-        //public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = 0;
-        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = -Math.toRadians(3.475 / voltsToDegrees); //2.0945
+        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = -Math.toRadians(1.168 / voltsToDegrees); //2.0945
 
-        //public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = 0;
-        public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = -Math.toRadians(.845 / voltsToDegrees);
-
-        public static final double kBackRightDriveAbsoluteEncoderOffsetRad = -Math.toRadians(430.2);
-        //public static final double kBackRightDriveAbsoluteEncoderOffsetRad =- Math.toRadians(3.475 / voltsToDegrees);
+        public static final double kBackRightDriveAbsoluteEncoderOffsetRad = -Math.toRadians(4.656 / voltsToDegrees);
 
         public static final double kPhysicalMaxSpeedMetersPerSecond = 5;
         public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;

@@ -55,11 +55,11 @@ public class SwerveModule {
 
        resetEncoders();
         resetsteerencoders();
-        //setEncoderBegin();
+        setEncoderBegin();
     }
-    public  void  setEncoderBegin() {
-      //  return Math.IEEEremainder(gyro.getangle(), 360)
-     turningEncoder.setPosition(90);
+    public void setEncoderBegin() {
+     //return Math.IEEEremainder(gyro.getangle(), 360);
+     turningEncoder.setPosition(0);
 
     }
 
@@ -103,10 +103,10 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState state) {
-        if (Math.abs(state.speedMetersPerSecond) < 0.001) {
-            stop();
-            return;
-        }
+       // if (Math.abs(state.speedMetersPerSecond) < 0.001) {
+         //   stop();
+          //  return;
+      //  }
         state = SwerveModuleState.optimize(state, getState().angle);
         driveMotor.set(state.speedMetersPerSecond / DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
         turningMotor.set(turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
